@@ -7,7 +7,9 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rb;
     public GameObject bomb;
     public GameObject mine;
-    public Animator playerAnimator;
+    private Animator playerAnimator;
+    private Vector2 playerVector;
+    private Vector2 lastVector;
 
     public float movementSpeed = 1;
 
@@ -15,6 +17,7 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         playerAnimator = GetComponent<Animator>();
+        playerAnimator.speed = movementSpeed / 5;
     }
     void Update()
     {
@@ -22,21 +25,37 @@ public class PlayerController : MonoBehaviour
         {
             Instantiate(bomb,transform.position, transform.rotation);
         }
-        if(Input.GetButton("Horizontal") || Input.GetButton("Vertical"))
+
+        if (playerVector != lastVector && playerVector != new Vector2(0,0))
         {
-            playerAnimator.SetTrigger("IsMoving");
+            playerAnimator.SetTrigger("ChangeDirection");
+            lastVector = playerVector;
         }
+
+        if (Input.GetButton("Horizontal") && Input.GetButton("Vertical"))
+        {
+            playerAnimator.SetFloat("Vertical", Input.GetAxisRaw("Vertical") / 2);
+            playerAnimator.SetFloat("Horizontal", Input.GetAxisRaw("Horizontal") / 2);
+        }
+        else
+        {
+            playerAnimator.SetFloat("Vertical", Input.GetAxisRaw("Vertical"));
+            playerAnimator.SetFloat("Horizontal", Input.GetAxisRaw("Horizontal"));
+        }
+        
 
     }
     void FixedUpdate()
     {
+        playerVector = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+
         if (Input.GetButton("Horizontal") && Input.GetButton("Vertical"))
         {
-            rb.velocity = new Vector2(Input.GetAxisRaw("Horizontal") * movementSpeed / 1.5f, Input.GetAxisRaw("Vertical") * movementSpeed / 1.5f);
+            rb.velocity = playerVector * movementSpeed / 1.5f;
         }
         else
         {
-            rb.velocity = new Vector2(Input.GetAxisRaw("Horizontal") * movementSpeed, Input.GetAxisRaw("Vertical") * movementSpeed);
+            rb.velocity = playerVector * movementSpeed;
         }
     }
 }
