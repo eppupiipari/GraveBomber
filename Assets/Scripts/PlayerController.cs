@@ -4,29 +4,31 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    private Rigidbody2D rb;
-    public GameObject bomb;
-    public GameObject mine;
+    private Rigidbody rb;
+    public GameObject Bomb;
+    public GameObject Mine;
+    private GameObject menu;
     private Animator playerAnimator;
-    private Vector2 playerVector;
-    private Vector2 lastVector;
+    private Vector3 playerVector;
+    private Vector3 lastVector;
 
-    public float movementSpeed = 1;
+    public float MovementSpeed = 1;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
+        menu = GameObject.Find("Canvas");
+        rb = GetComponent<Rigidbody>();
         playerAnimator = GetComponent<Animator>();
-        playerAnimator.speed = movementSpeed / 5;
+        playerAnimator.speed = MovementSpeed / 5;
     }
     void Update()
     {
         if (Input.GetButtonDown("Jump"))
         {
-            Instantiate(bomb,transform.position, transform.rotation);
+            Instantiate(Bomb,new Vector3(transform.position.x, -1.94f, transform.position.z), transform.rotation);
         }
 
-        if (playerVector != lastVector && playerVector != new Vector2(0,0))
+        if (playerVector != lastVector && playerVector != new Vector3(0,0,0))
         {
             playerAnimator.SetTrigger("ChangeDirection");
             lastVector = playerVector;
@@ -47,15 +49,30 @@ public class PlayerController : MonoBehaviour
     }
     void FixedUpdate()
     {
-        playerVector = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        playerVector = new Vector3(Input.GetAxisRaw("Horizontal"),0, Input.GetAxisRaw("Vertical"));
 
         if (Input.GetButton("Horizontal") && Input.GetButton("Vertical"))
         {
-            rb.velocity = playerVector * movementSpeed / 1.5f;
+            rb.velocity = playerVector * MovementSpeed / 1.5f;
         }
         else
         {
-            rb.velocity = playerVector * movementSpeed;
+            rb.velocity = playerVector * MovementSpeed;
+        }
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "Zombie")
+        {
+            menu.SendMessage("StopGame");
+        }
+        
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Explosion")
+        {
+            menu.SendMessage("StopGame");
         }
     }
 }

@@ -7,23 +7,26 @@ public class BombController : MonoBehaviour
     public float fuzeTimer;
     public float areaOfEffect;
 
-    private CircleCollider2D collider;
+    private SphereCollider collider;
+    private Animator bombAnimator;
 
     // Start is called before the first frame update
     void Start()
     {
-        collider = GetComponent<CircleCollider2D>();
-        collider.radius = areaOfEffect;
+        bombAnimator = GetComponent<Animator>();
+        collider = GetComponent<SphereCollider>();
         Invoke("Detonate", fuzeTimer);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
     void Detonate()
     {
         collider.enabled = true;
+        bombAnimator.SetTrigger("Detonate");
+        gameObject.transform.localScale = new Vector3(areaOfEffect, areaOfEffect, 0);
+        Invoke("Die", 0.4f);
+    }
+    void Die()
+    {
+        Destroy(gameObject);
     }
 }
